@@ -1,0 +1,22 @@
+{
+  "name": "prohibition",
+  "version": "1.0.0",
+  "description": "Secret Knock Authentication",
+  "main": "prohibition.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miniatureape/prohibition.git"
+  },
+  "keywords": [
+    "silly"
+  ],
+  "author": "Justin Donato",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miniatureape/prohibition/issues"
+  },
+  "homepage": "https://github.com/miniatureape/prohibition#readme"
+}
