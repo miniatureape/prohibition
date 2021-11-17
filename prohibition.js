@@ -38,12 +38,15 @@ const Knocker = function(elem, opts = {}) {
     return {
 
         knock: [],
+        maxThreshold: .03,
+        totalThreshold: .05,
 
         setFinisher: function(finisher) {
             this.finisher = finisher;
         },
 
         start: function() {
+            this.knock = [];
             this.handler = this.handleKnock.bind(this)
             elem.addEventListener(getListenerName(), this.handler)
         },
@@ -99,8 +102,9 @@ const Knocker = function(elem, opts = {}) {
             let maxDiff = pairs.reduce(max, 0)
             let totalDiff = pairs.reduce(total, 0)
 
-            console.log('testing', maxDiff, totalDiff)
-            return true;
+            console.log('testing', maxDiff, this.maxThreshold, totalDiff, this.totalThreshold)
+            return maxDiff < this.maxThreshold && totalDiff < this.totalThreshold;
+
         }
 
     }
