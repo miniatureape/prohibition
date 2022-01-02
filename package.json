@@ -1,6 +1,6 @@
 {
   "name": "prohibition",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Secret Knock Authentication",
   "main": "prohibition.js",
   "scripts": {
