@@ -1,5 +1,3 @@
-// changed
-
 function getListenerName() {
     return 'ontouchend' in window ? 'touchend' : 'click'
 }
