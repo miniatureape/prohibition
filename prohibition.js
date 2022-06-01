@@ -185,7 +185,7 @@ export const createSVGRenderer = function(mount, options) {
             }
             const padding = this.options.horizontalPadding
             const effectiveWidth = this.options.width - (padding * 2)
-            knock.forEach((timestamp) => {
+            knock.reverse().forEach((timestamp, i) => {
                 let x = padding + (effectiveWidth * timestamp)
                 let circle = this.element('circle', {
                     cx: x,
@@ -193,15 +193,16 @@ export const createSVGRenderer = function(mount, options) {
                     r: 10,
                     fill: this.options.knockColor
                 })
-                circle.appendChild(this.element('animate', {
+                let animation = this.element('animate', {
                     attributeName: 'r',
-                    values: `0; ${this.options.knockHeight * 1.5}; ${this.options.knockHeight}`,
-                    keyTimes: "0; .25; 1",
+                    values: `0; ${this.options.knockHeight * 1.5}; ${this.options.knockHeight};`,
+                    keyTimes: "0; .25; 1;",
                     dur: '300ms',
-                    repeatCount: 1,
-                    begin: 0,
-                }));
+                    begin: 'indefinite'
+                })
+                circle.appendChild(animation);
                 this.svg.append(circle);
+                animation.beginElement()
             });
         },
 
