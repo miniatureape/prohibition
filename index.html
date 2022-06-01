@@ -1,30 +1,36 @@
-<div id="door">Door</div>
-<div id="recorder">Recorder</div>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset=UTF-8>
+    <title>Hello World!</title>
+  </head>
+  <body>
 
-<script type="module">
+        <div id="door">Door</div>
+        <div id="recorder">Recorder</div>
+        <div id="svg-mount"></div>
 
-import { Prohibition } from './prohibition.js'
+        <script type="module">
 
-let doorElem = document.getElementById('door');
-let recorderElem = document.getElementById('recorder');
+        import { Prohibition, createSVGRenderer } from './prohibition.js'
 
-let recorder = Prohibition.getRecorder(recorderElem);
-let door = Prohibition.getGuard(doorElem);
+        let doorElem = document.getElementById('door');
+        let recorderElem = document.getElementById('recorder');
 
-function playKnock() {
-    console.log('knock')
-}
+        let recorder = Prohibition.getRecorder(recorderElem);
+        let door = Prohibition.getGuard(doorElem);
 
-recorder.listen('knock', playKnock)
+        let renderer = createSVGRenderer(document.getElementById('svg-mount'))
+        renderer.drawContainer();
 
-recorder.listen('recordDone', (knock) => {
-    door.start()
-    door.listen('knock', playKnock)
-    door.listen('guardDone', (result) => {
-        console.log('passed', door.test(recorder.getKnock()))
-    })
-});
-
-recorder.start()
-
-</script>
+        recorder.listen('recordDone', (knock) => {
+            renderer.drawKnock(knock)
+            door.start()
+            door.listen('guardDone', (result) => {
+                console.log('passed', door.test(recorder.getKnock()))
+            })
+        });
+        recorder.start()
+        </script>
+  </body>
+</html>
