@@ -174,6 +174,7 @@ export const createDOMRenderer = function(mount, opts) {
 
     function rebalanceKnocks() {
         let normKnocks = normalize(knocks)
+        console.log(normKnocks);
         normKnocks.forEach((k, i) => {
             setTimeout(function() {
                 let left = Math.max(options.horizontalPadding, (k * (options.width - options.horizontalPadding - options.knockWidth))) + "px";
@@ -203,12 +204,9 @@ export const createDOMRenderer = function(mount, opts) {
                     surface.appendChild(knockEl)
                 }
             }
-            knocks.push(knock)
+            knocks = knock
+            console.log(knocks);
             rebalanceKnocks()
         },
-
-        setKnockSeq: function(knocks) {
-            knocks = knocks;
-        }
     }
 }
