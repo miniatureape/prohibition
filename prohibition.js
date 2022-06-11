@@ -1,4 +1,3 @@
-// head
 function getListenerName() {
     return 'ontouchend' in window ? 'touchend' : 'click'
 }
@@ -12,6 +11,9 @@ function total(prev, current) {
 }
 
 function normalize(seq) {
+    if (seq.length == 1) {
+        return [.5];
+    }
     const min = Math.min(...seq)
     const max = Math.max(...seq) - min
     return seq.map(ts => (ts - min) / max)
@@ -40,8 +42,8 @@ const Knocker = function(elem, opts = {}) {
     return {
 
         knock: [],
-        maxThreshold: .03,
-        totalThreshold: .05,
+        maxThreshold: 100.03,
+        totalThreshold: 100.05,
 
         setFinisher: function(finisher) {
             this.finisher = finisher;
@@ -56,6 +58,8 @@ const Knocker = function(elem, opts = {}) {
         handleKnock: function(e) {
             this.fire('knock', e)
             this.knock.push(e.timeStamp)
+            this.knock.last = e.timeStamp
+            this.fire('knockChanged', this.knock)
             if (timer) {
                 timer = clearTimeout(timer)
             }
@@ -104,7 +108,6 @@ const Knocker = function(elem, opts = {}) {
             let maxDiff = pairs.reduce(max, 0)
             let totalDiff = pairs.reduce(total, 0)
 
-            console.log('testing', maxDiff, this.maxThreshold, totalDiff, this.totalThreshold)
             return maxDiff < this.maxThreshold && totalDiff < this.totalThreshold;
         }
 
@@ -143,92 +146,9 @@ export const Prohibition = {
 
 }
 
-export const createSVGRenderer = function(mount, options) {
+export const createDOMRenderer = function(mount, opts) {
 
-    return {
-
-        options: Object.assign({
-            width: 500,
-            height: 50,
-            horizontalPadding: 20,
-            knockHeight: 10,
-            knockWidth: 20,
-            bgColor: "#EFEFEF",
-            fgColor: "#AFAFAF",
-            knockColor: "#9F9F9F",
-        }, options),
-
-        knock: [],
-
-        element: function(name, attrs) {
-            let elem = document.createElementNS('http://www.w3.org/2000/svg', name)
-            for (const [key, value] of Object.entries(attrs)) {
-                elem.setAttribute(key, value)
-            }
-            return elem;
-        },
-
-        drawContainer: function() {
-            this.svg = this.element('svg', {
-                viewbox: `0 0 ${this.options.width} ${this.options.height}`,
-                height: this.options.height,
-                width: this.options.width,
-            });
-            mount.appendChild(this.svg);
-            this.drawSurface()
-            this.drawSpline()
-        },
-
-        drawKnock: function(knock) {
-            if (knock.length && knock[knock.length - 1] > 1) {
-                knock = normalize(knock)
-            }
-            const padding = this.options.horizontalPadding
-            const effectiveWidth = this.options.width - (padding * 2)
-            knock.reverse().forEach((timestamp, i) => {
-                let x = padding + (effectiveWidth * timestamp)
-                let circle = this.element('circle', {
-                    cx: x,
-                    cy: this.options.height / 2,
-                    r: 10,
-                    fill: this.options.knockColor
-                })
-                let animation = this.element('animate', {
-                    attributeName: 'r',
-                    values: `0; ${this.options.knockHeight * 1.5}; ${this.options.knockHeight};`,
-                    keyTimes: "0; .25; 1;",
-                    dur: '300ms',
-                    begin: 'indefinite'
-                })
-                circle.appendChild(animation);
-                this.svg.append(circle);
-                animation.beginElement()
-            });
-        },
-
-        drawSpline: function() {
-            this.svg.append(this.element('line', {
-                x1: 0,
-                x2: this.options.width,
-                y1: this.options.height / 2,
-                y2: this.options.height / 2,
-                stroke: this.options.fgColor,
-            }));
-        },
-
-        drawSurface: function() {
-            this.svg.append(this.element('rect', {
-                height: this.options.height,
-                width: this.options.width,
-                fill: this.options.bgColor,
-            }))
-        }
-    }
-}
-
-export const CanvasRenderer = {
-
-    options: {
+    const defaults = {
         width: 500,
         height: 50,
         horizontalPadding: 20,
@@ -237,62 +157,58 @@ export const CanvasRenderer = {
         bgColor: "#EFEFEF",
         fgColor: "#AFAFAF",
         knockColor: "#9F9F9F",
-    },
-
-    circle: function(canvas, x, y, rad) {
-        canvas.beginPath()
-        canvas.arc(x, y, rad, 0, 2 * Math.PI)
-        canvas.fill()
-    },
-
-    render: function(knock, canvas, options) {
-        this.options = Object.assign(this.options, options || {})
-        this.clearCanvas(canvas || this.createCanvas(options))
-        this.drawSpine(canvas)
-        this.drawKnock(canvas, knock)
-    },
-
-    createCanvas: function() {
-        let canvas = document.createElement('canvas');
-        canvas.setAttribute('context', '2d');
-        return canvas.getContext('2d');
-    },
-
-    clearCanvas: function(canvas) {
-        canvas.save()
-        canvas.canvas.setAttribute('width', this.options.width);
-        canvas.canvas.setAttribute('height', this.options.height);
-        canvas.fillStyle = this.options.bgColor;
-        canvas.fillRect(0, 0, this.options.width, this.options.height);
-        canvas.restore()
-        return canvas;
-    },
-
-    drawSpine: function(canvas) {
-        const halfKnock = this.options.knockWidth / 2;
-        canvas.save()
-        canvas.strokeStyle = this.options.fgColor;
-        canvas.moveTo(0, this.options.height / 2);
-        canvas.lineTo(this.options.width, this.options.height / 2);
-        canvas.stroke();
-        canvas.restore()
-    },
-
-    drawKnock: function(canvas, knock) {
-        // If its not already normalized, normalize it.
-        if (knock.length && knock[knock.length - 1] > 1) {
-            knock = normalize(knock)
-        }
-        const halfKnock = this.options.knockWidth / 2;
-        canvas.save()
-        canvas.fillStyle = this.options.knockColor
-        const padding = this.options.horizontalPadding
-        const effectiveWidth = this.options.width - (padding * 2)
-        knock.forEach((timestamp) => {
-            let x = padding + (effectiveWidth * timestamp)
-            this.circle(canvas, x, this.options.height / 2, this.options.knockHeight)
-        });
-        canvas.restore()
     }
 
+    let options = Object.assign(defaults, opts);
+    let knocks = [];
+    let knockEls = [];
+    let surface;
+
+    function element(name, attrs) {
+        let elem = document.createElement(name)
+        for (const [key, value] of Object.entries(attrs)) {
+            elem.setAttribute(key, value)
+        }
+        return elem
+    }
+
+    function rebalanceKnocks() {
+        let normKnocks = normalize(knocks)
+        normKnocks.forEach((k, i) => {
+            setTimeout(function() {
+                let left = Math.max(options.horizontalPadding, (k * (options.width - options.horizontalPadding - options.knockWidth))) + "px";
+                knockEls[i].style.left = left;
+                knockEls[i].style.opacity = 1
+            }, 1)
+        });
+    }
+
+    return {
+        drawContainer: function() {
+            surface = element('div', {'class': 'prohibition-container'})
+            const line = element('div', {'class': 'prohibition-spine'})
+            surface.appendChild(line)
+            mount.appendChild(surface)
+            return surface
+        },
+
+        updateKnock: function(knock) {
+            let numEls = knockEls.length;
+            if (knock.length != numEls) {
+                for (let i = numEls; i < knock.length; i++) {
+                    let knockEl = element('div', {
+                        'class': 'prohibition-knock',
+                    })
+                    knockEls.push(knockEl);
+                    surface.appendChild(knockEl)
+                }
+            }
+            knocks.push(knock)
+            rebalanceKnocks()
+        },
+
+        setKnockSeq: function(knocks) {
+            knocks = knocks;
+        }
+    }
 }
