@@ -1,5 +1,5 @@
 function getListenerName() {
-    return 'ontouchend' in window ? 'touchend' : 'click'
+    return 'ontouchend' in window ? 'touchstart' : 'click'
 }
 
 function max(prev, current) {
