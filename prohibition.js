@@ -177,7 +177,6 @@ export const createDOMRenderer = function(mount, opts) {
 
     function rebalanceKnocks() {
         let normKnocks = normalize(knocks)
-        console.log(normKnocks);
         normKnocks.forEach((k, i) => {
             setTimeout(function() {
                 let left = Math.max(options.horizontalPadding, (k * (options.width - options.horizontalPadding - options.knockWidth))) + "px";
@@ -198,7 +197,7 @@ export const createDOMRenderer = function(mount, opts) {
 
         updateKnock: function(knock) {
             let numEls = knockEls.length;
-            if (knock.length != numEls) {
+            if (knock.length > numEls) {
                 for (let i = numEls; i < knock.length; i++) {
                     let knockEl = element('div', {
                         'class': 'prohibition-knock',
@@ -206,9 +205,10 @@ export const createDOMRenderer = function(mount, opts) {
                     knockEls.push(knockEl);
                     surface.appendChild(knockEl)
                 }
+            } else if (knock.length < numEls) {
+                surface.removeChild(knockEls.pop())
             }
             knocks = knock
-            console.log(knocks);
             rebalanceKnocks()
         },
     }
