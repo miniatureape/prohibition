@@ -42,8 +42,8 @@ const Knocker = function(elem, opts = {}) {
     return {
 
         knock: [],
-        maxThreshold: 100.03,
-        totalThreshold: 100.05,
+        maxThreshold: .03,
+        totalThreshold: .05,
 
         setFinisher: function(finisher) {
             this.finisher = finisher;
@@ -194,8 +194,8 @@ export const createDOMRenderer = function(mount, opts) {
             mount.appendChild(surface)
             return surface
         },
-
         updateKnock: function(knock) {
+            console.log('updateKnock', knock)
             let numEls = knockEls.length;
             if (knock.length > numEls) {
                 for (let i = numEls; i < knock.length; i++) {
@@ -206,7 +206,9 @@ export const createDOMRenderer = function(mount, opts) {
                     surface.appendChild(knockEl)
                 }
             } else if (knock.length < numEls) {
-                surface.removeChild(knockEls.pop())
+                while(knock.length != knockEls.length) {
+                    surface.removeChild(knockEls.pop())
+                }
             }
             knocks = knock
             rebalanceKnocks()
