@@ -107,7 +107,7 @@ const Knocker = function(elem, opts = {}) {
 
             let maxDiff = pairs.reduce(max, 0)
             let totalDiff = pairs.reduce(total, 0)
-
+            console.log(maxDiff, totalDiff, this.maxThreshold, this.totalThreshold);
             return maxDiff < this.maxThreshold && totalDiff < this.totalThreshold;
         },
 
