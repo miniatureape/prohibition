@@ -114,6 +114,11 @@ const Knocker = function(elem, opts = {}) {
         stop: function() {
             this.removeListener();
         }
+
+        reset: function() {
+            this.stop();
+            this.start();
+        }
     }
 
 }
